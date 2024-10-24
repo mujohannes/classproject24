@@ -11,13 +11,18 @@ import { useState, useEffect } from "react"
 export function Signup ( props ) {
     const [ password, setPassword ] = useState('')
     const [ validpassword, setValidPassword ] = useState( false )
+    const [ email, setEmail ] = useState('')
+    const [ validEmail, setValidEmail ] = useState(false)
+    const [ password2, setPassword2 ] = useState('')
+    const [ firstName, setFirstName ] = useState( '' )
+    const [ lastName, setLastName ] = useState( '' )
 
     const navigate = useNavigate()
 
     const reqNumbers = "0123456789"
     const reqChars = "abcdefghijklmnopqrstuvwxyz"
     const reqCaps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    const reqSymbols = "!@#?$%^&*()_-+="
+    const reqSymbols = "!@#?$%^&*()_-+=/<>\"[]~"
 
     const includesNumbers = () => {
         const numbersArray = reqNumbers.split('')
@@ -63,6 +68,14 @@ export function Signup ( props ) {
         })
         return result
     }
+    useEffect( () => {
+        // validate email
+        if( 
+            (email.indexOf('@') > 0 && email.indexOf('@') < email.length-1 ) 
+            && (email.indexOf('.') > 0 && email.indexOf('.') < email.length-1 )
+        )
+        { setValidEmail( true ) }
+    }, [email])
 
     useEffect( () => {
         if( 
@@ -97,11 +110,33 @@ export function Signup ( props ) {
                         <Form className="mt-4" onSubmit={ (event) => signUpUser(event) }>
                             <h2>Sign up for an account</h2>
                             <Form.Group>
+                                <Form.Label>First Name</Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    placeholder="Dylan"
+                                    name="first"
+                                    value={ firstName }
+                                    onChange={ (event) => setFirstName(event.target.value) }
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Last Name</Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    placeholder="Smith"
+                                    name="last"
+                                    value={ lastName }
+                                    onChange={ (event) => setLastName(event.target.value) }
+                                />
+                            </Form.Group>
+                            <Form.Group>
                                 <Form.Label>Email</Form.Label>
                                 <Form.Control 
                                     type="email" 
                                     placeholder="you@domain.com"
                                     name="email"
+                                    value={email}
+                                    onChange={ (event) => setEmail(event.target.value)}
                                 />
                             </Form.Group>
                             <Form.Group>
@@ -114,17 +149,33 @@ export function Signup ( props ) {
                                     onChange={ (event) => setPassword( event.target.value ) }
                                 />
                                 <Form.Text>
-                                    Password must contain at least one uppercase, lowercase, a number and a symbol and be between 8 and 15 characters long
+                                    Password must contain at least an uppercase, a lowercase, a number and a symbol, like {reqSymbols} and be between 8 and 15 characters long
                                 </Form.Text>
                             </Form.Group>
+                            <Form.Group>
+                                <Form.Label className="mt-3">Repeat password</Form.Label>
+                                <Form.Control 
+                                    type="password" 
+                                    placeholder="type your password again" 
+                                    name="password2"
+                                    value={ password2 }
+                                    onChange={ (event) => setPassword2( event.target.value ) }
+                                />
+                            </Form.Group>
                             <Button 
-                            type="submit" 
-                            variant="primary" 
-                            className="my-3 mx-auto d-block w-100"
-                            disabled = { (validpassword) ? false : true }
+                                type="submit" 
+                                variant="primary" 
+                                className="my-3 mx-auto d-block w-100"
+                                disabled = { 
+                                    (validpassword
+                                         && validEmail 
+                                         && password == password2 ) 
+                                    ? false : true 
+                                }
                             >
                                 Sign up
                             </Button>
+                            <Form.Text>email {validEmail} pw {validpassword}</Form.Text>
                         </Form>
                     </Col>
                 </Row>
