@@ -14,8 +14,10 @@ export function Signup ( props ) {
     const [ email, setEmail ] = useState('')
     const [ validEmail, setValidEmail ] = useState(false)
     const [ password2, setPassword2 ] = useState('')
+    const [ validPassword2, setValidPassword2 ] = useState( false )
     const [ firstName, setFirstName ] = useState( '' )
     const [ lastName, setLastName ] = useState( '' )
+    const [ errorMessage, setErrorMessage ] = useState()
 
     const navigate = useNavigate()
 
@@ -78,6 +80,7 @@ export function Signup ( props ) {
     }, [email])
 
     useEffect( () => {
+        // validate password against the rules
         if( 
             (password.length >= 8 && password.length <= 15)
             && includesNumbers() == true
@@ -93,13 +96,27 @@ export function Signup ( props ) {
         }
     } , [ password ] )
 
+    useEffect( () => {
+        // validate that password2 matches password
+        if( password2 == password ) {
+            setValidPassword2( true )
+        }
+        else {
+            setValidPassword2( false )
+        }
+
+    }, [password2])
+
     const signUpUser = ( event ) => {
         event.preventDefault()
         const formdata = new FormData(event.target)
         const email = formdata.get("email")
         const password = formdata.get("password") 
         createUserWithEmailAndPassword( props.authapp, email, password )
-        .then( (response) => navigate("/") )
+        .then( (response) => {
+            // create user profile in Firestore
+            navigate("/")} 
+        )
         .catch( (error) => console.log(error) )
     }
     return (
@@ -112,6 +129,7 @@ export function Signup ( props ) {
                             <Form.Group>
                                 <Form.Label>First Name</Form.Label>
                                 <Form.Control 
+                                    required
                                     type="text" 
                                     placeholder="Dylan"
                                     name="first"
@@ -122,6 +140,7 @@ export function Signup ( props ) {
                             <Form.Group>
                                 <Form.Label>Last Name</Form.Label>
                                 <Form.Control 
+                                    required
                                     type="text" 
                                     placeholder="Smith"
                                     name="last"
@@ -132,6 +151,7 @@ export function Signup ( props ) {
                             <Form.Group>
                                 <Form.Label>Email</Form.Label>
                                 <Form.Control 
+                                    required
                                     type="email" 
                                     placeholder="you@domain.com"
                                     name="email"
@@ -142,19 +162,18 @@ export function Signup ( props ) {
                             <Form.Group>
                                 <Form.Label className="mt-3">Password</Form.Label>
                                 <Form.Control 
+                                    required
                                     type="password" 
                                     placeholder="minimum 8 characters" 
                                     name="password"
                                     value={ password }
                                     onChange={ (event) => setPassword( event.target.value ) }
                                 />
-                                <Form.Text>
-                                    Password must contain at least an uppercase, a lowercase, a number and a symbol, like {reqSymbols} and be between 8 and 15 characters long
-                                </Form.Text>
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label className="mt-3">Repeat password</Form.Label>
                                 <Form.Control 
+                                    required
                                     type="password" 
                                     placeholder="type your password again" 
                                     name="password2"
@@ -162,6 +181,9 @@ export function Signup ( props ) {
                                     onChange={ (event) => setPassword2( event.target.value ) }
                                 />
                             </Form.Group>
+                            <Form.Text>
+                                    Password must contain at least an uppercase, a lowercase, a number and a symbol, like {reqSymbols} and be between 8 and 15 characters long
+                                </Form.Text>
                             <Button 
                                 type="submit" 
                                 variant="primary" 
@@ -169,13 +191,14 @@ export function Signup ( props ) {
                                 disabled = { 
                                     (validpassword
                                          && validEmail 
-                                         && password == password2 ) 
+                                         && validPassword2 ) 
                                     ? false : true 
                                 }
                             >
                                 Sign up
                             </Button>
-                            <Form.Text>email {validEmail} pw {validpassword}</Form.Text>
+                            <Form.Text>{ errorMessage }</Form.Text>
+                            
                         </Form>
                     </Col>
                 </Row>
