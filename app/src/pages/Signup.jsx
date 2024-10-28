@@ -6,7 +6,11 @@ import Col from 'react-bootstrap/Col'
 
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
+
+import { FirestoreContext } from '../contexts/FirestoreContext';
+import { doc, setDoc } from '@firebase/firestore'
+import { ProfileContext } from '../contexts/ProfileContext';
 
 export function Signup ( props ) {
     const [ password, setPassword ] = useState('')
@@ -20,6 +24,8 @@ export function Signup ( props ) {
     const [ errorMessage, setErrorMessage ] = useState()
 
     const navigate = useNavigate()
+    const db = useContext( FirestoreContext )
+    const userProfile = useContext( ProfileContext )
 
     const reqNumbers = "0123456789"
     const reqChars = "abcdefghijklmnopqrstuvwxyz"
@@ -98,7 +104,7 @@ export function Signup ( props ) {
 
     useEffect( () => {
         // validate that password2 matches password
-        if( password2 == password ) {
+        if( password2 == password && password.length > 0 ) {
             setValidPassword2( true )
         }
         else {
@@ -106,6 +112,10 @@ export function Signup ( props ) {
         }
 
     }, [password2])
+
+    useEffect( () => {
+        console.log( validPassword2 )
+    })
 
     const signUpUser = ( event ) => {
         event.preventDefault()
@@ -115,9 +125,25 @@ export function Signup ( props ) {
         createUserWithEmailAndPassword( props.authapp, email, password )
         .then( (response) => {
             // create user profile in Firestore
+            createUserProfile( response.user.uid )
+            // set user profile in the app
+            userProfile.setUserProfile(
+                {
+                    first: firstName,
+                    last: lastName,
+                    uid: response.user.uid,
+                    email: response.user.email
+                }
+            )
             navigate("/")} 
         )
         .catch( (error) => console.log(error) )
+    }
+
+    const createUserProfile = async ( userId ) => {
+        const document= doc( db, "users", userId )
+        const userData = { first: firstName, last: lastName }
+        const docRef = await setDoc( document, userData )
     }
     return (
         <>
@@ -190,8 +216,8 @@ export function Signup ( props ) {
                                 className="my-3 mx-auto d-block w-100"
                                 disabled = { 
                                     (validpassword
-                                         && validEmail 
-                                         && validPassword2 ) 
+                                    && validEmail 
+                                    && validPassword2 ) 
                                     ? false : true 
                                 }
                             >
