@@ -39,7 +39,7 @@ function App() {
     <>
       <AuthContext.Provider value={auth} >
         <FirestoreContext.Provider value={Firestore}>
-          <ProfileContext.Provider value={{userProfile, setUserProfile}}>
+          <ProfileContext.Provider value={[userProfile, setUserProfile]}>
             <Header />
             <Routes>
               <Route path="/" element={<Home />} />
