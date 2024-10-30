@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.css'
 import { Routes, Route, Outlet, Link } from "react-router-dom";
 
@@ -35,18 +35,20 @@ function App() {
     }
   })
 
+  useEffect( () => { console.log(userProfile) }, [userProfile])
+
   return (
     <>
       <AuthContext.Provider value={auth} >
         <FirestoreContext.Provider value={Firestore}>
-          <ProfileContext.Provider value={[userProfile, setUserProfile]}>
+          <ProfileContext.Provider value={setUserProfile}>
             <Header />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/signup" element={<Signup authapp={FirebaseAuth} />} />
               <Route path="/logout" element={<Logout authapp={FirebaseAuth} />} />
               <Route path="/signin" element={<Signin authapp={FirebaseAuth} />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile" element={<Profile data={ userProfile } />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ProfileContext.Provider>

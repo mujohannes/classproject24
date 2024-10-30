@@ -14,19 +14,20 @@ import { ProfileContext } from '../contexts/ProfileContext';
 
 export function Signup(props) {
     const [password, setPassword] = useState('')
-    const [validpassword, setValidPassword] = useState(false)
+    let validPassword = false;
     const [email, setEmail] = useState('')
-    //const [ validEmail, setValidEmail ] = useState(false)
     let validEmail = false
     const [password2, setPassword2] = useState('')
-    const [validPassword2, setValidPassword2] = useState(false)
+    let validPassword2 = false
     const [firstName, setFirstName] = useState('')
+    let validFirstName = false
     const [lastName, setLastName] = useState('')
+    let validLastName = false
     const [errorMessage, setErrorMessage] = useState()
 
     const navigate = useNavigate()
     const db = useContext(FirestoreContext)
-    const [userProfile, setUserProfile] = useContext(ProfileContext)
+    const profile = useContext(ProfileContext)
 
     document.title = "Sign up for an account"
 
@@ -35,45 +36,46 @@ export function Signup(props) {
     const reqCaps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     const reqSymbols = "!@#?$%^&*()_-+=/<>\"[]~"
 
-    const includesNumbers = () => {
+    // function to check if password includes numbers
+    const includesNumbers = ( str ) => {
         const numbersArray = reqNumbers.split('')
         let result = false
         numbersArray.forEach((number) => {
-            if (password.includes(number)) {
+            if (str.includes(number)) {
                 result = true
             }
         })
         return result
     }
-
-    const includesChars = () => {
+    // function to check if password includes lowercase characters
+    const includesChars = ( str ) => {
         const charsArray = reqChars.split('')
         let result = false
         charsArray.forEach((char) => {
-            if (password.includes(char)) {
+            if (str.includes(char)) {
                 result = true
             }
 
         })
         return result
     }
-
-    const includesCaps = () => {
+    // function to check if password includes uppercase characters
+    const includesCaps = ( str ) => {
         const capsArray = reqCaps.split('')
         let result = false
         capsArray.forEach((cap) => {
-            if (password.includes(cap)) {
+            if (str.includes(cap)) {
                 result = true
             }
         })
         return result
     }
-
-    const includesSymbols = () => {
+    // function to check if password includes special characters
+    const includesSymbols = ( str ) => {
         const symbolsArray = reqSymbols.split('')
         let result = false
         symbolsArray.forEach((symbol) => {
-            if (password.includes(symbol)) {
+            if (str.includes(symbol)) {
                 result = true
             }
         })
@@ -88,32 +90,52 @@ export function Signup(props) {
         validEmail = false
     }
 
-    useEffect(() => {
-        // validate password against the rules
-        if (
-            (password.length >= 8 && password.length <= 15)
-            && includesNumbers() == true
-            && includesChars() == true
-            && includesCaps() == true
-            && includesSymbols() == true
-        ) {
-            setValidPassword(true)
-        }
-        else {
-            setValidPassword(false)
-        }
-    }, [password])
+    if (
+        (password.length >= 8 && password.length <= 15)
+        && includesNumbers( password ) == true
+        && includesChars( password ) == true
+        && includesCaps( password ) == true
+        && includesSymbols( password ) == true
+    ) {
+        validPassword = true
+    }
+    else {
+        validPassword = false
+    }
 
-    useEffect(() => {
-        // validate that password2 matches password
-        if (password2 == password && password.length > 0) {
-            setValidPassword2(true)
-        }
-        else {
-            setValidPassword2(false)
-        }
+    // validating second password without using effect
+    if (password2 == password && password.length > 0) {
+        validPassword2 = true
+    }
+    else {
+        validPassword2 = false
+    }
 
-    }, [password2])
+    // validating first name
+    if(firstName.length > 0 
+        && includesChars( firstName )  == true 
+        && includesNumbers( firstName ) == false
+        && includesSymbols( firstName ) == false
+    ) 
+    {
+        validFirstName = true
+    }
+    else {
+        validFirstName = false
+    }
+
+    // validating last name
+    if(lastName.length > 0 
+        && includesChars( lastName )  == true 
+        && includesNumbers( lastName ) == false
+        && includesSymbols( lastName ) == false
+    ) 
+    {
+        validLastName = true
+    }
+    else {
+        validLastName = false
+    }
 
     // useEffect( () => {
     //     console.log(validEmail, validpassword, validPassword2)
@@ -129,7 +151,7 @@ export function Signup(props) {
                 // create user profile in Firestore
                 createUserProfile(response.user.uid)
                 // set user profile in the app
-                setUserProfile(
+                profile(
                     {
                         first: firstName,
                         last: lastName,
@@ -154,7 +176,7 @@ export function Signup(props) {
             <Container className="mt-4">
                 <Row>
                     <Col md={{ span: 4, offset: 4 }}>
-                        <Form className="mt-4" onSubmit={(event) => signUpUser(event)}>
+                        <Form className="mt-4" onSubmit={(event) => signUpUser(event)} noValidate >
                             <h2>Sign up for an account</h2>
                             <Form.Group>
                                 <Form.Label>First Name</Form.Label>
@@ -165,8 +187,12 @@ export function Signup(props) {
                                     name="first"
                                     value={firstName}
                                     onChange={(event) => setFirstName(event.target.value)}
+                                    className={ (validFirstName ) ? "is-valid" : ( firstName.length > 0) ? "is-invalid" : "" }
                                 />
                             </Form.Group>
+                            <Form.Control.Feedback type="invalid">
+                                no numbers or symbols for first name
+                            </Form.Control.Feedback>
                             <Form.Group>
                                 <Form.Label>Last Name</Form.Label>
                                 <Form.Control
@@ -176,6 +202,7 @@ export function Signup(props) {
                                     name="last"
                                     value={lastName}
                                     onChange={(event) => setLastName(event.target.value)}
+                                    className={ (validLastName) ? "is-valid" : ( lastName.length > 0) ? "is-invalid" : "" }
                                 />
                             </Form.Group>
                             <Form.Group>
@@ -187,6 +214,7 @@ export function Signup(props) {
                                     name="email"
                                     value={email}
                                     onChange={(event) => setEmail(event.target.value)}
+                                    className={ (validEmail) ? "is-valid" : ( email.length > 0) ? "is-invalid" : "" }
                                 />
                             </Form.Group>
                             <Form.Group>
@@ -198,6 +226,7 @@ export function Signup(props) {
                                     name="password"
                                     value={password}
                                     onChange={(event) => setPassword(event.target.value)}
+                                    className={ (validPassword) ? "is-valid" : ( password.length > 0) ? "is-invalid" : "" }
                                 />
                             </Form.Group>
                             <Form.Group>
@@ -209,6 +238,7 @@ export function Signup(props) {
                                     name="password2"
                                     value={password2}
                                     onChange={(event) => setPassword2(event.target.value)}
+                                    className={ (validPassword2) ? "is-valid" : ( password2.length > 0) ? "is-invalid" : "" }
                                 />
                             </Form.Group>
                             <Form.Text>
@@ -219,9 +249,12 @@ export function Signup(props) {
                                 variant="primary"
                                 className="my-3 mx-auto d-block w-100"
                                 disabled={
-                                    (validpassword
+                                    (validPassword
                                         && validEmail
-                                        && validPassword2)
+                                        && validPassword2
+                                        && validFirstName
+                                        && validLastName
+                                    )
                                         ? false : true
                                 }
                             >
