@@ -7,7 +7,7 @@ import Col from 'react-bootstrap/Col'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useContext } from "react"
-
+import { AuthContext } from '../contexts/AuthContext';
 import { FirestoreContext } from '../contexts/FirestoreContext';
 import { doc, setDoc } from '@firebase/firestore'
 import { ProfileContext } from '../contexts/ProfileContext';
@@ -26,8 +26,9 @@ export function Signup(props) {
     const [errorMessage, setErrorMessage] = useState()
 
     const navigate = useNavigate()
+    const auth = useContext(AuthContext)
     const db = useContext(FirestoreContext)
-    const profile = useContext(ProfileContext)
+    const { userProfile, setUserProfile } = useContext(ProfileContext)
 
     document.title = "Sign up for an account"
 
@@ -146,12 +147,12 @@ export function Signup(props) {
         const formdata = new FormData(event.target)
         const email = formdata.get("email")
         const password = formdata.get("password")
-        createUserWithEmailAndPassword(props.authapp, email, password)
+        createUserWithEmailAndPassword(auth, email, password)
             .then((response) => {
                 // create user profile in Firestore
                 createUserProfile(response.user.uid)
                 // set user profile in the app
-                profile(
+                setUserProfile(
                     {
                         first: firstName,
                         last: lastName,
@@ -189,10 +190,13 @@ export function Signup(props) {
                                     onChange={(event) => setFirstName(event.target.value)}
                                     className={ (validFirstName ) ? "is-valid" : ( firstName.length > 0) ? "is-invalid" : "" }
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Name cannot contain numbers or special characters
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                    Looking good {firstName}!
+                                </Form.Control.Feedback>
                             </Form.Group>
-                            <Form.Control.Feedback type="invalid">
-                                no numbers or symbols for first name
-                            </Form.Control.Feedback>
                             <Form.Group>
                                 <Form.Label>Last Name</Form.Label>
                                 <Form.Control
@@ -204,6 +208,12 @@ export function Signup(props) {
                                     onChange={(event) => setLastName(event.target.value)}
                                     className={ (validLastName) ? "is-valid" : ( lastName.length > 0) ? "is-invalid" : "" }
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Last name cannot contain numbers or special characters
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                    Looking good {firstName} {lastName}!
+                                </Form.Control.Feedback>
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label>Email</Form.Label>
@@ -216,6 +226,12 @@ export function Signup(props) {
                                     onChange={(event) => setEmail(event.target.value)}
                                     className={ (validEmail) ? "is-valid" : ( email.length > 0) ? "is-invalid" : "" }
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Email must be in the format user@domain.tld
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                   Good one!
+                                </Form.Control.Feedback>
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label className="mt-3">Password</Form.Label>
@@ -228,6 +244,12 @@ export function Signup(props) {
                                     onChange={(event) => setPassword(event.target.value)}
                                     className={ (validPassword) ? "is-valid" : ( password.length > 0) ? "is-invalid" : "" }
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Password must follow the pattern shown below. Why? No reason, lol.
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                    That's what we're talking about!
+                                </Form.Control.Feedback>
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label className="mt-3">Repeat password</Form.Label>
@@ -240,6 +262,12 @@ export function Signup(props) {
                                     onChange={(event) => setPassword2(event.target.value)}
                                     className={ (validPassword2) ? "is-valid" : ( password2.length > 0) ? "is-invalid" : "" }
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Password must be the same as the one above.
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                    You're killing it! Welcome aboard!
+                                </Form.Control.Feedback>
                             </Form.Group>
                             <Form.Text>
                                 Password must contain at least an uppercase, a lowercase, a number and a symbol, like {reqSymbols} and be between 8 and 15 characters long

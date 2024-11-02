@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.css'
-import { Routes, Route, Outlet, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import { Header } from './components/Header';
 import { Signup } from './pages/Signup';
@@ -35,26 +35,24 @@ function App() {
     }
   })
 
-  useEffect( () => { console.log(userProfile) }, [userProfile])
-
   return (
-    <>
+    <div>
       <AuthContext.Provider value={auth} >
         <FirestoreContext.Provider value={Firestore}>
-          <ProfileContext.Provider value={setUserProfile}>
+          <ProfileContext.Provider value={{userProfile, setUserProfile }}>
             <Header />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/signup" element={<Signup authapp={FirebaseAuth} />} />
+              <Route path="/signup" element={<Signup authapp={FirebaseAuth} profileUpdater={ setUserProfile } />} />
               <Route path="/logout" element={<Logout authapp={FirebaseAuth} />} />
               <Route path="/signin" element={<Signin authapp={FirebaseAuth} />} />
-              <Route path="/profile" element={<Profile data={ userProfile } />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ProfileContext.Provider>
         </FirestoreContext.Provider>
       </AuthContext.Provider>
-    </>
+    </div>
   )
 }
 

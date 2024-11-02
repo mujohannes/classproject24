@@ -1,6 +1,9 @@
-export function Home ( props ) {
+import Container from 'react-bootstrap/Container'
+export function Home(props) {
     document.title = "Home page"
     return (
-        <h1>Home</h1>
+        <Container fluid>
+            <h1>Home</h1>
+        </Container>
     )
 }
