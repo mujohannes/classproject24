@@ -6,6 +6,7 @@ import Col from "react-bootstrap/Col"
 import Card from "react-bootstrap/Card"
 import Button from "react-bootstrap/Button"
 import { collection, getDocs } from "firebase/firestore"
+import { Link } from "react-router-dom"
 
 export function Home(props) {
     const [bookdata,setBookData] = useState([])
@@ -47,6 +48,7 @@ export function Home(props) {
                         <Card.Text>
                             A book by {book.author}
                         </Card.Text>
+                        <Button as Link to="/detail/{book.id}"></Button>
                     </Card.Body>
                 </Card>
             </Col>
