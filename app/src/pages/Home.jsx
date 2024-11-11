@@ -32,6 +32,7 @@ export function Home(props) {
         }
     }, [booksLoaded])
 
+    // map each book to a component
     const Books = bookdata.map( (book) => {
         return (
             <Col md={3}>
