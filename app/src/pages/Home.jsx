@@ -5,6 +5,7 @@ import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import Card from "react-bootstrap/Card"
 import Button from "react-bootstrap/Button"
+import {Link} from 'react-router-dom'
 import { collection, getDocs } from "firebase/firestore"
 
 export function Home(props) {
@@ -47,6 +48,13 @@ export function Home(props) {
                         <Card.Text>
                             A book by {book.author}
                         </Card.Text>
+                        <Button as={Link} 
+                            variant="primary" 
+                            className="w-100" 
+                            to={"/detail/" + book.id}
+                        >
+                            Detail
+                        </Button>
                     </Card.Body>
                 </Card>
             </Col>
