@@ -11,12 +11,15 @@ import { firebaseConfig } from './config/Config';
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { AuthContext } from './contexts/AuthContext'
+import { getFirestore } from 'firebase/firestore'
+import { FirestoreContext } from './contexts/FirestoreContext'
 
 function App() {
   const [auth, setAuth] = useState()
 
   const FirebaseApp = initializeApp(firebaseConfig)
   const FirebaseAuth = getAuth(FirebaseApp)
+  const Firestore = getFirestore(FirebaseApp)
 
   onAuthStateChanged(FirebaseAuth, (user) => {
     if (user) {
@@ -30,13 +33,15 @@ function App() {
   return (
     <>
       <AuthContext.Provider value={auth} >
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<Signup authapp={FirebaseAuth} />} />
-          <Route path="/logout" element={ <Logout authapp={FirebaseAuth} /> } />
-          <Route path="/signin" element={<Signin authapp={FirebaseAuth} />} />
-        </Routes>
+        <FirestoreContext.Provider value={Firestore}>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/signup" element={<Signup authapp={FirebaseAuth} />} />
+            <Route path="/logout" element={<Logout authapp={FirebaseAuth} />} />
+            <Route path="/signin" element={<Signin authapp={FirebaseAuth} />} />
+          </Routes>
+        </FirestoreContext.Provider>
       </AuthContext.Provider>
     </>
   )
