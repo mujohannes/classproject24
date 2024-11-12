@@ -7,7 +7,7 @@ import Card from "react-bootstrap/Card"
 import Button from "react-bootstrap/Button"
 import {Link} from 'react-router-dom'
 import { collection, getDocs } from "firebase/firestore"
-import { Link } from "react-router-dom"
+
 
 export function Home(props) {
     const [bookdata,setBookData] = useState([])
