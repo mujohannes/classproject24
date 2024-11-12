@@ -115,7 +115,11 @@ export function Signup(props) {
             <Container>
                 <Row>
                     <Col md={{ span: 4, offset: 4 }}>
-                        <Form className="mt-4" onSubmit={(event) => signUpUser(event)}>
+                        <Form 
+                        className="mt-4" 
+                        onSubmit={(event) => signUpUser(event)}
+                        novalidate
+                        >
                             <h2>Sign up for an account</h2>
                             <Form.Group>
                                 <Form.Label>Email</Form.Label>
@@ -125,7 +129,16 @@ export function Signup(props) {
                                     name="email"
                                     value={email}
                                     onChange={(event) => setEmail(event.target.value)}
+                                    className={ 
+                                        ( validemail) ? "is-valid" : 
+                                        ( email.length > 0) ? "is-invalid" : ""}
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Please type a valid email address
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                    Looking good!
+                                </Form.Control.Feedback>
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label className="mt-3">Password</Form.Label>
@@ -136,7 +149,9 @@ export function Signup(props) {
                                     value={password}
                                     onChange={(event) => setPassword(event.target.value)}
                                 />
-                                
+                                <Form.Control.Feedback type="invalid">
+                                Password must contain at least an uppercase, a lowercase, a number and a symbol like {reqSymbols} and be between 8 and 15 characters long
+                                </Form.Control.Feedback>
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label className="mt-3">Retype Password</Form.Label>
