@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import { Routes, Route, Outlet, Link } from "react-router-dom";
 
 import { Header } from './components/Header';
+import { Footer } from './components/Footer'
 import { Signup } from './pages/Signup';
 import { Home } from './pages/Home';
 import { Logout } from './pages/Logout';
@@ -14,6 +15,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { AuthContext } from './contexts/AuthContext'
 import { getFirestore } from 'firebase/firestore'
 import { FirestoreContext } from './contexts/FirestoreContext'
+import './App.css'
 
 function App() {
   const [auth, setAuth] = useState()
@@ -41,8 +43,9 @@ function App() {
             <Route path="/signup" element={<Signup authapp={FirebaseAuth} />} />
             <Route path="/logout" element={<Logout authapp={FirebaseAuth} />} />
             <Route path="/signin" element={<Signin authapp={FirebaseAuth} />} />
-            <Route path="/detail/:id" element={ <BookDetail/> } />
+            <Route path="/detail/:bookId" element={<BookDetail /> } />
           </Routes>
+          <Footer />
         </FirestoreContext.Provider>
       </AuthContext.Provider>
     </>
