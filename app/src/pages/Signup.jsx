@@ -4,9 +4,10 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
+import { AuthContext } from '../contexts/AuthContext'
 
 export function Signup(props) {
     const [password, setPassword] = useState('')
@@ -15,30 +16,33 @@ export function Signup(props) {
     const [validemail, setValidEmail] = useState(false)
     const [password2, setPassword2] = useState('')
     const [validpassword2, setValidPassword2] = useState(false)
+    const [username, setUserName ] = useState('')
+    const [validusername,setValidUserName ] = useState(false)
 
     const navigate = useNavigate()
+    const auth = useContext( AuthContext)
 
     const reqNumbers = "0123456789"
     const reqChars = "abcdefghijklmnopqrstuvwxyz"
     const reqCaps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     const reqSymbols = "!@#?$%^&*()_-+=/|<>"
 
-    const includesNumbers = () => {
+    const includesNumbers = (str) => {
         const numbersArray = reqNumbers.split('')
         let result = false
         numbersArray.forEach((number) => {
-            if (password.includes(number)) {
+            if (str.includes(number)) {
                 result = true
             }
         })
         return result
     }
 
-    const includesChars = () => {
+    const includesChars = ( str ) => {
         const charsArray = reqChars.split('')
         let result = false
         charsArray.forEach((char) => {
-            if (password.includes(char)) {
+            if (str.includes(char)) {
                 result = true
             }
 
@@ -46,35 +50,48 @@ export function Signup(props) {
         return result
     }
 
-    const includesCaps = () => {
+    const includesCaps = (str) => {
         const capsArray = reqCaps.split('')
         let result = false
         capsArray.forEach((cap) => {
-            if (password.includes(cap)) {
+            if (str.includes(cap)) {
                 result = true
             }
         })
         return result
     }
 
-    const includesSymbols = () => {
+    const includesSymbols = (str) => {
         const symbolsArray = reqSymbols.split('')
         let result = false
         symbolsArray.forEach((symbol) => {
-            if (password.includes(symbol)) {
+            if (str.includes(symbol)) {
                 result = true
             }
         })
         return result
     }
-
+    // validate username
+    useEffect( () => {
+        if( username.length >= 4 
+            && includesSymbols(username) == false
+        )
+        {
+            setValidUserName(true)
+        }
+        else {
+            setValidUserName( false )
+        }
+        console.log( includesSymbols(username).toString() )
+    }, [username])
+    // validate password
     useEffect(() => {
         if (
             (password.length >= 8 && password.length <= 15)
-            && includesNumbers() == true
-            && includesChars() == true
-            && includesCaps() == true
-            && includesSymbols() == true
+            && includesNumbers(password) == true
+            && includesChars(password) == true
+            && includesCaps(password) == true
+            && includesSymbols(password) == true
         ) {
             setValidPassword(true)
         }
@@ -82,7 +99,7 @@ export function Signup(props) {
             setValidPassword(false)
         }
     }, [password])
-
+    // validate email
     useEffect(() => {
         if (email.indexOf('@') > 0 && email.indexOf('.') > 0 ) {
             setValidEmail(true)
@@ -91,7 +108,7 @@ export function Signup(props) {
             setValidEmail(false)
         }
     }, [email])
-
+    // validate confirm password
     useEffect( () => {
         if( password2 == password && validpassword ) {
             setValidPassword2( true )
@@ -106,9 +123,13 @@ export function Signup(props) {
         const formdata = new FormData(event.target)
         const email = formdata.get("email")
         const password = formdata.get("password")
+        const username = formdata.get("username")
         createUserWithEmailAndPassword(props.authapp, email, password)
-            .then((response) => navigate("/"))
-            .catch((error) => console.log(error))
+            .then((response) => {
+                console.log(response)
+                //navigate("/")
+            })
+            .catch((error) => console.log(error.code.split('/').replace('-', ' ') ))
     }
     return (
         <>
@@ -118,9 +139,28 @@ export function Signup(props) {
                         <Form 
                         className="mt-4" 
                         onSubmit={(event) => signUpUser(event)}
-                        novalidate
+                        noValidate
                         >
                             <h2>Sign up for an account</h2>
+                            <Form.Group>
+                                <Form.Label>Username</Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    placeholder="username"
+                                    required
+                                    name="username"
+                                    value={ username }
+                                    onChange={ (evt) => setUserName(evt.target.value) }
+                                    className={ (validusername) ? 
+                                        "is-valid" : (username.length > 0) ? "is-invalid" : ""}
+                                />
+                                <Form.Control.Feedback type="invalid">
+                                    Username has to be at least 4 characters long and cannot contain symbols
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                    Looks good {username}
+                                </Form.Control.Feedback>
+                            </Form.Group>
                             <Form.Group>
                                 <Form.Label>Email</Form.Label>
                                 <Form.Control
@@ -148,9 +188,18 @@ export function Signup(props) {
                                     name="password"
                                     value={password}
                                     onChange={(event) => setPassword(event.target.value)}
+                                    className={ 
+                                        ( validpassword) ? "is-valid" : 
+                                        ( password.length > 0) ? "is-invalid" : ""}
                                 />
                                 <Form.Control.Feedback type="invalid">
-                                Password must contain at least an uppercase, a lowercase, a number and a symbol like {reqSymbols} and be between 8 and 15 characters long
+                                Password must contain at least an <strong>uppercase</strong>, 
+                                a <strong>lowercase</strong>, a <strong>number</strong> 
+                                and a <strong>symbol </strong>  
+                                like <span style={{letterSpacing: "2px"}}>{reqSymbols}</span> and be <strong>between 8 and 15 characters</strong> long
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                    Hope you can remember this one!
                                 </Form.Control.Feedback>
                             </Form.Group>
                             <Form.Group>
@@ -161,16 +210,22 @@ export function Signup(props) {
                                     name="password2"
                                     value={password2}
                                     onChange={(event) => setPassword2(event.target.value)}
+                                    className={ 
+                                        ( validpassword2) ? "is-valid" : 
+                                        ( password2.length > 0) ? "is-invalid" : ""}
                                 />
-                                <Form.Text>
-                                    Password must contain at least an uppercase, a lowercase, a number and a symbol like {reqSymbols} and be between 8 and 15 characters long
-                                </Form.Text>
+                                <Form.Control.Feedback type="invalid">
+                                    Yo! This has to match the other one
+                                </Form.Control.Feedback>
+                                <Form.Control.Feedback type="valid">
+                                    Awesome!
+                                </Form.Control.Feedback>
                             </Form.Group>
                             <Button
                                 type="submit"
                                 variant="primary"
                                 className="my-3 mx-auto d-block w-100"
-                                disabled={(validpassword && validemail && validpassword2) ? false : true}
+                                disabled={(validpassword && validemail && validpassword2 && validusername ) ? false : true}
                             >
                                 Sign up
                             </Button>
