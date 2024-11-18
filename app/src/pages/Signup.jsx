@@ -126,8 +126,8 @@ export function Signup(props) {
         const username = formdata.get("username")
         createUserWithEmailAndPassword(props.authapp, email, password)
             .then((response) => {
-                console.log(response)
-                //navigate("/")
+                //console.log(response)
+                navigate("/")
             })
             .catch((error) => console.log(error.code.split('/').replace('-', ' ') ))
     }
