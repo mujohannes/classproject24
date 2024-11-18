@@ -42,6 +42,7 @@ export function Home(props) {
                         variant="top" 
                         src={"/book_covers/" + book.cover} 
                         style={{maxWidth:"100%"}}
+                        className="book-cover"
                     />
                     <Card.Body>
                         <Card.Title>{ book.title }</Card.Title>
