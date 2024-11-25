@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button'
 import { useParams } from 'react-router-dom'
 import { useState, useEffect, useContext } from 'react'
 import { FirestoreContext } from '../contexts/FirestoreContext'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { AuthContext } from '../contexts/AuthContext'
 
 export function BookDetail(props) {
@@ -35,6 +35,12 @@ export function BookDetail(props) {
         let bookObject = detail.data()
         bookObject.id = detail.id
         setBook(bookObject)
+    }
+    // function to borrow book
+    const borrowBook = () => {
+        // mark book status as borrowed
+        const ref = doc( db, 'books', book.id )
+        // use updateDoc to update document status
     }
 
     const BorrowButton = (props) => {
