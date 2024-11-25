@@ -35,14 +35,15 @@ export function Home(props) {
     }, [booksLoaded])
 
     // map each book to a component
-    const Books = bookdata.map( (book) => {
+    const Books = bookdata.map( (book, key) => {
         return (
-            <Col md={3}>
+            <Col md={3} key={ key}>
                 <Card>
                     <Card.Img 
                         variant="top" 
                         src={"/book_covers/" + book.cover} 
                         style={{maxWidth:"100%"}}
+                        className="book-cover"
                     />
                     <Card.Body>
                         <Card.Title>{ book.title }</Card.Title>
