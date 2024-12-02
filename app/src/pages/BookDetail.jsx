@@ -5,12 +5,13 @@ import Button from 'react-bootstrap/Button'
 import { useParams } from 'react-router-dom'
 import { useState, useEffect, useContext } from 'react'
 import { FirestoreContext } from '../contexts/FirestoreContext'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { AuthContext } from '../contexts/AuthContext'
 
 export function BookDetail(props) {
     const [book, setBook] = useState()
     const [signedIn, setSignedIn] = useState(false)
+    const [borrowed, setBorrowed ] = useState( false )
 
     const params = useParams()
     const db = useContext(FirestoreContext)
@@ -23,7 +24,7 @@ export function BookDetail(props) {
             setSignedIn(true)
         }
         else {
-            // console.log("not signed in")
+            //console.log("not signed in")
             setSignedIn(false)
         }
     }, [auth])
@@ -34,14 +35,44 @@ export function BookDetail(props) {
         const detail = await getDoc(ref)
         let bookObject = detail.data()
         bookObject.id = detail.id
+        if( bookObject.onloan ) {
+            setBorrowed( true )
+        }
         setBook(bookObject)
+    }
+    // function to borrow a book
+    const borrowBook = async () => {
+        //console.log( book.id )
+        const ref = doc( db, "books", book.id )
+        const update = await updateDoc( ref, { onloan: true })
+        // let tempbook = book
+        // tempbook.onloan = true
+        // setBook( tempbook )
+        setBorrowed( true )
+        // record who borrowed the book and when
+        //console.log( auth.uid, new Date().getTime()  )
+        const loanRecord = await addDoc(
+            collection( db, "loans"),
+            {
+                bookId: book.id,
+                bookTitle: book.title,
+                userId: auth.uid,
+                time: serverTimestamp()
+            }
+        )
+        console.log( loanRecord.id )
     }
 
     const BorrowButton = (props) => {
         if (signedIn) {
             return (
-                <Button type="button" variant="primary">
-                    Borrow this book
+                <Button 
+                    type="button" 
+                    variant="primary" 
+                    onClick={ () => borrowBook() }
+                    disabled={ (borrowed) ? true : false }
+                >
+                    { (borrowed) ? "This book is on loan" : "Borrow this book"}
                 </Button>
             )
         }
@@ -51,7 +82,9 @@ export function BookDetail(props) {
     }
 
     useEffect(() => {
-        getBookDetail()
+        if(!book) {
+            getBookDetail()
+        }
     }, [book])
 
 
