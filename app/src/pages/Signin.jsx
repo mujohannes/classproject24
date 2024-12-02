@@ -36,7 +36,9 @@ export function Signin ( props ) {
         signInWithEmailAndPassword( props.authapp, email, password )
         .then( (response) => {
             const userId = response.user.uid
-            console.log( userId )
+            // set props.admin to false to prevent addbook and listloans 
+            // from flashing in the navigation after an admin has logged in
+            props.admin( false )
             checkAdmin( userId ).then( ( result ) => {
                 if( result == true ) { 
                     props.admin(true) 
